@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors'
 import { authRoute } from './routes/auth.router.js';
+import musicRoute from './routes/musicgen.router.js';
 dotenv.config();
 
 const app = express()
@@ -11,6 +12,8 @@ const app = express()
 app.use(bodyParser.json())
 app.use(cors())
 app.use('/auth', authRoute)
+app.use('/music', musicRoute)
+
 
 const PORT = process.env.PORT || 8000;
 const DB = process.env.MONGO_URI;
