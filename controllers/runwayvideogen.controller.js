@@ -12,7 +12,7 @@ export const generateVideo = async (req, res) => {
             headers: {
                 accept: 'application/json',
                 'content-type': 'application/json',
-                Authorization: process.env.RUNWAY_API_KEY,  // Use your env key here
+                Authorization: process.env.RUNWAY_API_KEY,  
             },
             data: {
                 text_prompt: textPrompt,
@@ -40,10 +40,10 @@ export const checkVideoStatus = async (req, res) => {
     try {
         const options = {
             method: 'GET',
-            url: `https://api.aivideoapi.com/status?uuid=${uuid}`,  // API call only happens here
+            url: `https://api.aivideoapi.com/status?uuid=${uuid}`,  
             headers: {
                 accept: 'application/json',
-                Authorization: process.env.RUNWAY_API_KEY,  // Ensure API key is correctly set
+                Authorization: process.env.RUNWAY_API_KEY,  
             },
         };
         const response = await axios.request(options);
