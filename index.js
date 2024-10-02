@@ -15,6 +15,7 @@ app.use(cors())
 app.use('/auth', authRoute)
 app.use('/music', musicRoute)
 app.use('/video', videoGenRoute);
+// app.use('/runwayauto', runwayAutoRoute);
 
 
 const PORT = process.env.PORT || 8000;
