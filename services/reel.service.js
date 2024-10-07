@@ -4,8 +4,6 @@ import fs from 'fs';
 import { pipeline } from 'stream/promises';
 import dotenv from 'dotenv';
 
-import { spawn } from 'child_process'
-
 import ffmpegPath from '@ffmpeg-installer/ffmpeg';
 import ffmpeg from 'fluent-ffmpeg'
 import { Deepgram_Api_Key, Google_Api_Key } from '../config.js';
