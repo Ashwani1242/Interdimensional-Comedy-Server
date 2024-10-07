@@ -1,12 +1,20 @@
 import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors'
 import { authRoute } from './routes/auth.router.js';
 import musicRoute from './routes/musicgen.router.js';
 import videoGenRoute from './routes/runwayvideogen.router.js';
-dotenv.config();
+import reelGenRoute from './routes/reel.router.js';
+
+import path from 'path';
+
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express()
 
@@ -16,6 +24,11 @@ app.use('/auth', authRoute)
 app.use('/music', musicRoute)
 app.use('/video', videoGenRoute);
 // app.use('/runwayauto', runwayAutoRoute);
+
+app.use('/api/reel-gen', reelGenRoute);
+
+// app.use(express.static('uploads'));
+app.use('/uploads', express.static('uploads'));
 
 
 const PORT = process.env.PORT || 8000;
