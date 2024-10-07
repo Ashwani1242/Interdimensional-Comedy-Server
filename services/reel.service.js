@@ -8,7 +8,7 @@ import ffmpegPath from '@ffmpeg-installer/ffmpeg';
 import ffmpeg from 'fluent-ffmpeg'
 import { Deepgram_Api_Key, Google_Api_Key } from '../config.js';
 ffmpeg.setFfmpegPath(ffmpegPath.path);
-let command = ffmpeg();
+// let command = ffmpeg();
 let timemark = null;
 
 dotenv.config();
