@@ -4,10 +4,10 @@ import fs from 'fs';
 import { pipeline } from 'stream/promises';
 import dotenv from 'dotenv';
 
-import ffmpegPath from 'ffmpeg-static';
+// import ffmpegPath from 'ffmpeg-static';
 import ffmpeg from 'fluent-ffmpeg'
 import { Deepgram_Api_Key, Google_Api_Key } from '../config.js';
-ffmpeg.setFfmpegPath(ffmpegPath);
+// ffmpeg.setFfmpegPath(ffmpegPath);
 // let command = ffmpeg();
 let timemark = null;
 
