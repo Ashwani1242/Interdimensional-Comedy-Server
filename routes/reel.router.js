@@ -1,7 +1,7 @@
-import { Router } from 'express';
+import express from 'express';
 import multer from 'multer';
 
-const reelGenRoute = Router();
+const reelGenRoute = express.Router();
 import { generateSummaryController } from '../controllers/reel.controller.js';
 
 const upload = multer({ dest: 'uploads/' });

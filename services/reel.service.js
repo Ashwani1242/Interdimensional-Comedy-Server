@@ -4,10 +4,10 @@ import fs from 'fs';
 import { pipeline } from 'stream/promises';
 import dotenv from 'dotenv';
 
-// import ffmpegPath from 'ffmpeg-static';
+import ffmpegPath from 'ffmpeg-static';
 import ffmpeg from 'fluent-ffmpeg'
 import { Deepgram_Api_Key, Google_Api_Key } from '../config.js';
-// ffmpeg.setFfmpegPath(ffmpegPath);
+ffmpeg.setFfmpegPath(ffmpegPath);
 // let command = ffmpeg();
 let timemark = null;
 
@@ -27,7 +27,7 @@ function fileToGenerativePart(path, mimeType) {
     };
 }
 
-const systemPrompt = "Forget all the previous instructions. You have to generate an extremely funny Roast about this Image for about 80 words, it should be extremely funny in order to make it viral in social media. If the image is a profile page of some social media, then you have to generate the roast about that, Analyze the Image carefully and generate the roast based on that, if the image is inconceivable or meaningless or distorted, then you have to roast the user who is submitting this image. It is not necessary that the image is definitely social media screenshot, it can be anything, so keep that in mind, there might be some cases that the social media screenshot is not really the user's personal account as well. Remember to only generate the main roast and nothing else"
+const systemPrompt = "Forget all the previous instructions. You have to generate an extremely funny Roast about this Image for about 40 words, it should be extremely funny in order to make it viral in social media. If the image is a profile page of some social media, then you have to generate the roast about that, Analyze the Image carefully and generate the roast based on that, if the image is inconceivable or meaningless or distorted, then you have to roast the user who is submitting this image. It is not necessary that the image is definitely social media screenshot, it can be anything, so keep that in mind, there might be some cases that the social media screenshot is not really the user's personal account as well. Remember to only generate the main roast and nothing else"
 
 export async function generateSummary(imageFile) {
     try {
@@ -58,11 +58,15 @@ export async function generateAudioFromSummary(summaryText) {
             }
         );
 
+        // console.log(response)
+
         const stream = await response.getStream();
+
         if (stream) {
             const file = fs.createWriteStream(outputFile);
             await pipeline(stream, file);
             console.log(`Audio file written to ${outputFile}`);
+            console.log(stream, file)
             return outputFile;
         } else {
             console.error('Error: No stream returned from Deepgram');
@@ -199,15 +203,18 @@ export async function combineImageAndAudio(imageFile, audioFile, summaryText) {
                         outputs: 'final_video'
                     },
                 ])
-                .map('final_video')
                 .input(audioFile)
                 .videoCodec('libx264')
                 .audioCodec('aac')
                 .addOptions([
                     // '-c:s', 'mov_text',
-                    // '-map', '[final_video]',
+                    '-tune', 'stillimage',
+                    // '-shortest',
+                    '-map', '[final_video]',
                     '-map', '0:v',
                     '-map', '3:a',
+                    '-b:a', '192k',
+                    '-pix_fmt', 'yuv420p'
                     // '-metadata:s:s:0', 'language=eng',
                     // '-r', '24'
                 ])
@@ -223,25 +230,32 @@ export async function combineImageAndAudio(imageFile, audioFile, summaryText) {
 
 
 function concatenateVideos(video1Path, video2Path, outputPath) {
+    const introVideo = 'uploads/system/intro.mp4'
     return new Promise((resolve, reject) => {
         const fileListPath = 'file_list.txt';
+        // const fileListContent = `file '${introVideo}'\nfile '${video1Path}'\nfile '${video2Path}'`;
         const fileListContent = `file '${video1Path}'\nfile '${video2Path}'`;
 
-        fs.writeFileSync(fileListPath, fileListContent);
+        fs.writeFileSync(fileListPath, fileListContent, 'utf-8');
 
         ffmpeg()
             .input(fileListPath)
             .inputOptions('-f', 'concat')
             .inputOptions('-safe', '0')
-            .outputOptions('-c', 'copy')
-            // .videoCodec('libx264')
-            // .audioCodec('aac')
-            .outputOptions('-preset', 'slow') // Slower preset for better compression
+            // .outputOptions('-c', 'copy')
+            .outputOptions('-movflags', '+faststart') // Fast start for mobile compatibility
+            .videoCodec('libx264')
+            .audioCodec('aac')                  
+            .format('mp4')   
+            // .outputOptions('-preset', 'medium')
+            .outputOptions('-preset', 'medium') // Slower preset for better compression
             .outputOptions('-crf', '23')  // Constant Rate Factor (CRF) controls quality (lower = better)
             .outputOptions('-b:v', '5000k')  // Set video bitrate for 1080p (5000 kbps)
             .outputOptions('-b:a', '128k')   // Set audio bitrate (128 kbps for AAC)
             .outputOptions('-pix_fmt', 'yuv420p') // Ensure playback on older players
-            // .outputOptions('-vf', 'scale=1080:1920') // Scale video to 1080x1920 (portrait mode)
+            .outputOptions('-vf', 'scale=1080:1920')
+            // .outputOptions('-map', '0:v:0')   // Map all video streams
+            // .outputOptions('-map', '0:a:0') // Scale video to 1080x1920 (portrait mode)
             // .outputOptions('-shortest')
             // .outputOptions('-sseof', '-20')
             // .outputOptions('-vf', `filename=${captionFilePath}:force_style='Fontsize=8,OutlineColour=&H30000000,BorderStyle=3,Shadow=1,PrimaryColour=&HFFFFFF,SecondaryColour=&HFFFFFF,Alignment=2'`) 

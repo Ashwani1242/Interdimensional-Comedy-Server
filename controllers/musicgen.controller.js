@@ -1,40 +1,85 @@
 import axios from 'axios';
+import { Music_Api_Key } from '../config.js';
 
 export const generateMusic = async (req, res) => {
-    const { is_auto, title, prompt, isInstrumental } = req.body;
+    const { title, prompt, instrumental } = req.body;
+
+    let musicUrl = ''
+    let imageUrl = ''
+    let lyrics = ''
+    let songTitle = ''
 
     console.log("Received request to generate music:", {
-        is_auto,
         title,
         prompt,
-        isInstrumental,
+        instrumental,
     });
 
-    const requestData = {
-        is_auto,
-        prompt,
-        lyrics: '_',
-        title,
-        instrumental: isInstrumental ? 1 : 0,
+    const postData = {
+        title: title,
+        prompt: prompt,
+        gpt_description_prompt: '',
+        custom_mode: false,
+        make_instrumental: instrumental,
+        model: 'chirp-v3.0',
+        callback_url: '',
+        disable_callback: true,
+        token: 'd6b51270-1d71-4e2c-ad8d-b49389c8c943'
     };
 
-    try {
-        console.log("Sending request to music generation API with data:", requestData);
 
-        const response = await axios.post('https://api.topmediai.com/v1/music', requestData, {
-            headers: {
-                'x-api-key': process.env.MUSIC_API_KEY,
-                'Content-Type': 'application/json',
-            },
-        });
+    try {
+        console.log("Sending request to music generation API with data:", postData);
+
+        const response = await axios.post(
+            'https://udioapi.pro/api/generate',
+            postData,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const { workId } = response.data;
+
+        if (!workId) {
+            throw new Error('No workId returned from the API');
+        }
+
+        console.log(`Work ID: ${workId}`);
+
+        let isComplete = false;
 
         console.log("Received response from music generation API:", response.data);
 
-        const musicData = response.data;
+        while (!isComplete) {
+            console.log('Polling for completion...');
+            const pollResponse = await axios.post(`https://udioapi.pro/api/feed?workId=${workId}`);
+
+            const { type, response_data } = pollResponse.data;
+
+            if (type === 'complete') {
+                isComplete = true;
+
+                musicUrl = response_data[0].audio_url;
+                imageUrl = response_data[0].image_url;
+                lyrics = response_data[0].prompt;
+                songTitle = response_data[0].title
+
+                console.log('Music generation complete!');
+            } else {
+                console.log('Still generating music. Waiting...');
+                await new Promise((resolve) => setTimeout(resolve, 10000));  // Wait for 5 seconds before polling again
+            }
+        }
 
         res.status(200).json({
             message: 'Music generated successfully!',
-            music: musicData,
+            musicUrl,
+            imageUrl,
+            lyrics,
+            songTitle
         });
     } catch (error) {
         console.error('Error generating music:', error);

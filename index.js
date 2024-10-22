@@ -12,24 +12,30 @@ import reelGenRoute from './routes/reel.router.js';
 import path from 'path';
 
 import { fileURLToPath } from 'url';
+import lofiMixRoute from './routes/lofimix.router.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express()
 
+app.use(cors({
+    origin: '*', // Allow all origins (for testing only; consider limiting this in production)
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'], // Allowed headers
+    credentials: 'omit', // Allow cookies to be sent (if needed)
+  }));
+// app.use(express.static('uploads'));
+app.use('/uploads', express.static('uploads'));
+
 app.use(bodyParser.json())
-app.use(cors())
 app.use('/auth', authRoute)
 app.use('/music', musicRoute)
 app.use('/video', videoGenRoute);
 // app.use('/runwayauto', runwayAutoRoute);
 
 app.use('/api/reel-gen', reelGenRoute);
-
-// app.use(express.static('uploads'));
-app.use('/uploads', express.static('uploads'));
-
+app.use('/api/lofi-mix', lofiMixRoute);
 
 const PORT = process.env.PORT || 8000;
 const DB = process.env.MONGO_URI;
