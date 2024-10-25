@@ -24,7 +24,7 @@ export const generateMusic = async (req, res) => {
         model: 'chirp-v3.0',
         callback_url: '',
         disable_callback: true,
-        token: 'd6b51270-1d71-4e2c-ad8d-b49389c8c943'
+        token: 'dd3bec30-e8b4-4d53-9f4a-8dde791475cc'
     };
 
 
